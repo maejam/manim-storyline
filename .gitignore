@@ -9,5 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
-# Manim stuff
+# Manim
 media/
+
+# Other stuff
+test*.py

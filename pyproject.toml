@@ -8,6 +8,11 @@ dependencies = [
     "manim>=0.19.0",
 ]
 
+[dependency-groups]
+dev = [
+    "mypy>=1.17.1",
+]
+
 # [project.entry-points."manim.plugins"]
 # name="manim-storyline"
 
@@ -33,3 +38,4 @@ files = ["src"]
 show_error_codes = true
 pretty = true
 strict = true
+
