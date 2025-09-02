@@ -1,0 +1,35 @@
+[project]
+name = "manim-storyline"
+version = "0.1.0"
+description = "Build dynamic transitions between 'scenes' in Manim."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "manim>=0.19.0",
+]
+
+# [project.entry-points."manim.plugins"]
+# name="manim-storyline"
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.ruff]
+src = ["src"]
+fix = true
+show-fixes = true
+output-format = "full"
+
+[tool.ruff.lint]
+extend-select = ["I"] # isort
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+show_error_codes = true
+pretty = true
+strict = true
