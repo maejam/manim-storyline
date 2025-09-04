@@ -13,11 +13,21 @@ class StoryLineException(Exception):
 
 
 class StoryLineScene(m.MovingCameraScene):  # type:ignore[misc]
+    def __init_subclass__(
+        cls, display_origin_frame: bool = True, add_origin_frame_to_world: bool = True
+    ) -> None:
+        cls.display_origin_frame = display_origin_frame
+        cls.add_origin_frame_to_world = add_origin_frame_to_world
+
     def setup(self) -> None:
         self.world = m.Group()
         self.stories: dict[str, "Story"] = {}
         self.origin = self.head = self.create_story("origin")
         self.origin.in_dot = self.origin.out_dot
+        if self.display_origin_frame:
+            self.add(self.origin.frame)
+        if self.add_origin_frame_to_world:
+            self.add_to_world(self.origin.frame)
 
     def create_story(self, name: str, *args, **kwargs) -> "Story":  # type: ignore[no-untyped-def]
         # TODO: find a way to type method without repeating dataclass signature (using fields?)
@@ -53,14 +63,9 @@ class Story:
     def __post_init__(self) -> None:
         self.scene.stories[self.name] = self
 
-    def add(self, mobject: m.Mobject) -> None:
+    def add(self, mobject: m.Mobject, world: bool = False) -> None:
         position = self.frame.get_center()
         mobject.move_to(position)
-
-
-def add_to_story(mobject: m.Mobject, story: Story) -> m.Mobject:
-    story.add(mobject)
-    return mobject
-
-
-m.Mobject.add_to_story = add_to_story  # pyright: ignore[reportAttributeAccessIssue]
+        self.scene.add(mobject)
+        if world:
+            self.scene.add_to_world(mobject)
