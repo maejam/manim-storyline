@@ -7,6 +7,7 @@ from dataclasses import field
 import manim as m  # type: ignore[import-untyped]
 import manim.typing as mt  # type: ignore[import-untyped]
 import numpy as np
+import numpy.polynomial as npp
 
 if t.TYPE_CHECKING:
     from .storyline import Story
@@ -220,18 +221,88 @@ class VerticalStoryLine(FreeStoryLine):
 
 @dataclass
 class PolyFitStoryLine(FreeStoryLine):
-    def get_stories_dot_coords(self) -> tuple[np.ndarray, np.ndarray]:
-        x = np.array([])
-        y = np.array([])
-        for num, story in enumerate(self.scene.stories.values()):
-            x[num] = story.dot.get_x()
-            y[num] = story.dot.get_x()
-        return x, y
+    stories_to_include_in_polyfit: t.Iterable["str | Story"] = ()
+    stories_to_exclude_from_polyfit: t.Iterable["str | Story"] = ()
+    poly_degree: int | None = None
+    arrow_tip: m.ArrowTip = field(
+        default_factory=lambda: m.ArrowTriangleFilledTip(color=m.WHITE)
+    )
+    poly: t.ClassVar[np.ndarray | None] = None
 
-    # def animate_arrow(self, start: m.Mobject, end: m.Mobject) -> m.Animation:
-    #     poly = npp.Polynomial.fit(self.get_stories_dot_coords())
-    #     print(poly)
-    # self.arrow.put_start_and_end_on(start.get_center(), end.get_center())
-    # animation = m.GrowArrow(self.arrow)
-    # self.scene.add_to_world(self.arrow)
-    # return animation
+    def _transition(self, target: "Story", scene: "StoryLineScene") -> None:
+        self.scene = scene
+        self.stories = self.determine_stories_to_include()
+        for story in self.stories:
+            self.adjust_dot_position(story, "out")
+
+        if self.poly is None:  # Fit once and for all
+            degree = self.poly_degree or len(self.stories) - 1
+            dots_coords = self.get_stories_dot_coords()
+            self.__class__.poly = self.fit_polynomial(
+                dots_coords["x"], dots_coords["y"], degree
+            )
+        super()._transition(target, scene)
+
+    def determine_stories_to_include(self) -> list["Story"]:
+        stories = []
+        for story in self.stories_to_include_in_polyfit:
+            if type(story) is str:
+                stories.append(self.scene.stories[story])
+            elif type(story) is Story:
+                stories.append(story)
+        if not stories:
+            stories = list(self.scene.stories.values())
+            exclude: list[Story] = []
+            for num, story in enumerate(self.stories_to_exclude_from_polyfit):
+                if type(story) is str:
+                    exclude[num] = self.scene.stories[story]
+                elif type(story) is Story:
+                    exclude[num] = story
+            for story in stories:
+                if story in exclude:
+                    stories.remove(story)
+        return stories
+
+    def get_stories_dot_coords(self) -> dict[str, np.ndarray]:
+        x = np.zeros(len(self.stories))
+        y = np.zeros(len(self.stories))
+        for num, story in enumerate(self.stories):
+            dot_position = story.out_dot.get_center()
+            x[num], y[num] = dot_position[0], dot_position[1]
+        return {"x": x, "y": y}
+
+    def fit_polynomial(self, x: np.ndarray, y: np.ndarray, degree: int) -> np.ndarray:
+        print("fitting")
+        poly = npp.polynomial.polyfit(x, y, deg=degree)
+        return poly
+
+    def animate_arrow(self, start: m.Mobject, end: m.Mobject) -> m.Animation:
+        def poly(x: float) -> float:
+            y = 0
+            assert self.poly is not None  # make mypy and pyright happy :)
+            for deg, coef in enumerate(self.poly):
+                y += coef * x**deg
+            return y
+
+        # TODO: Aligning the arrow tip with the dots is tricky. This is just good enough.
+        f = m.ParametricFunction(
+            lambda x: [x, poly(x), 0],  # pyright: ignore[reportArgumentType]
+            t_range=[
+                start.get_x(),
+                end.get_x(m.RIGHT) - self.arrow_tip.length_over_dim(0),
+                0.01,
+            ],  # pyright: ignore[reportArgumentType]
+        )
+
+        def position_tip(tip: m.Mobject) -> None:
+            """Rotates the tip along the azimuthal (from manim.mobject.geometry.arc source code)"""
+            handle = f.points[-2]
+            anchor = f.get_end()
+            angles = m.cartesian_to_spherical((handle - anchor).tolist())
+            tip.rotate(
+                angles[1] - m.PI - tip.tip_angle,
+            ).move_to(f.get_end())
+
+        self.arrow_tip.add_updater(position_tip)
+        self.scene.add(self.arrow_tip)
+        return m.Create(f)

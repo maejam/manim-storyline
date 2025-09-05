@@ -38,4 +38,4 @@ files = ["src"]
 show_error_codes = true
 pretty = true
 strict = true
-
+exclude_gitignore = true
