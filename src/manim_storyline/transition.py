@@ -58,6 +58,16 @@ class Transition(ABC):
         target
             The story to transition to.
         """
+        self.setup(target)
+
+    def setup(self, target: "Story") -> None:
+        """Define the logic to setup the transition.
+
+        Parameters
+        ----------
+        target
+            The story to transition to.
+        """
         self.scene = target.scene
         self.head = self.scene.head
         self.target = target
@@ -564,7 +574,7 @@ class PolyFitStoryLine(FreeStoryLine):
         story
             The story to transition to.
         """
-        self.scene = target.scene
+        self.setup(target)
         self.stories = self.determine_stories_to_include()
         for story in self.stories:
             self.adjust_dot_position(story, "out")
@@ -575,6 +585,16 @@ class PolyFitStoryLine(FreeStoryLine):
             self.poly = self.fit_polynomial(dots_coords["x"], dots_coords["y"], degree)
         super()._transition(target)
 
+    def setup(self, target: "Story") -> None:
+        """Define the logic to setup this transition.
+
+        Parameters
+        ----------
+        target
+            The story to transition to.
+        """
+        super().setup(target)
+
     def determine_stories_to_include(self) -> list["Story"]:
         """Determine the stories to include in the fit.
 
@@ -582,21 +602,22 @@ class PolyFitStoryLine(FreeStoryLine):
         -------
             A list of story objects to include in the fit.
         """
+        from .storyline import Story
+
         stories = []
         for story in self.stories_to_include_in_polyfit:
-            try:
-                stories.append(self.scene.stories[story])  # pyright: ignore[reportArgumentType]
-            except KeyError:
+            if type(story) is str:
+                stories.append(self.scene.stories[story])
+            elif type(story) is Story:
                 stories.append(story)
         if not stories:
             stories = list(self.scene.stories.values())
-            for story in stories:
+            for story in stories.copy():
                 if (
                     story in self.stories_to_exclude_from_polyfit
                     or story.name in self.stories_to_exclude_from_polyfit
                 ):
                     stories.remove(story)
-        print(list(story.name for story in stories))
         return stories
 
     def get_stories_dot_coords(self) -> dict[str, np.ndarray]:

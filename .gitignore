@@ -13,4 +13,4 @@ wheels/
 media/
 
 # Other stuff
-test*.py
+src/manim_storyline/test*.py

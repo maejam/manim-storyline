@@ -11,6 +11,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=1.17.1",
+    "pytest>=8.4.2",
 ]
 
 # [project.entry-points."manim.plugins"]
@@ -39,6 +40,9 @@ ignore = [
     "D105", # magic method docstring
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+
 [tool.ruff.lint.isort]
 force-single-line = true
 
@@ -57,3 +61,10 @@ show_error_codes = true
 pretty = true
 strict = true
 exclude_gitignore = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore:The '__version__' attribute is deprecated:DeprecationWarning",
+    "ignore:'audioop' is deprecated and slated for removal:DeprecationWarning"
+]
