@@ -27,10 +27,28 @@ show-fixes = true
 output-format = "full"
 
 [tool.ruff.lint]
-extend-select = ["I"] # isort
+extend-select = [
+    "I", # isort
+    "D", # pydocstyle
+    "E", # pycodestyle error
+    "W",  # pycodestyle warning
+]
+ignore = [
+    "D102", # public method docstring
+    "D104", # package docstring
+    "D105", # magic method docstring
+]
 
 [tool.ruff.lint.isort]
 force-single-line = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.pyright]
+pythonVersion = "3.12"
+include = ["src"]
+typeCheckingMode = "basic"
 
 [tool.mypy]
 python_version = "3.12"
