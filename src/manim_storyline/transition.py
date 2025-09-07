@@ -487,10 +487,12 @@ class PolyFitStoryLine(FreeStoryLine):
 
     Useful to give the impression of a smooth curve going through multiple stories.
     A good placement of the story frames and their respective out_dots is essential
-    to give a good result.
-    This transition still occurs between two stories (the head and a target) but
-    in order to compute the polynomial function it needs to know all the stories
-    from the beginning (``stories_to_include_in_polyfit`` parameter).
+    to give a good result. The target in_dot will be moved to the same position as
+    its out_dot (it is still possible to use a different dot though).
+    This transition still occurs between two stories (the head and a target) but in
+    order to compute the polynomial function it needs to know all the stories from
+    the beginning (``stories_to_include_in_polyfit`` and
+    ``stories_to_exclude_from_polyfit parameters).
 
     Steps:
     - Fit the polynomial through all the dots first.
@@ -594,6 +596,8 @@ class PolyFitStoryLine(FreeStoryLine):
             The story to transition to.
         """
         super().setup(target)
+        self.target.in_dot_direction = self.target.out_dot_direction
+        self.target.in_dot_buffer = self.target.out_dot_buffer
 
     def determine_stories_to_include(self) -> list["Story"]:
         """Determine the stories to include in the fit.
