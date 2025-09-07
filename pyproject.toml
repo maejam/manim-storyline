@@ -42,6 +42,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
+"examples/*" = ["D"]
 
 [tool.ruff.lint.isort]
 force-single-line = true
