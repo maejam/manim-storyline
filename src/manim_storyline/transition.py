@@ -460,8 +460,6 @@ class HorizontalStoryLine(FreeStoryLine):
         dot = super().adjust_dot_position(story, in_or_out)
         if story is self.target:
             dot.set_y(self.head.out_dot.get_y())
-        else:
-            dot.set_y(self.head.in_dot.get_y())
         return dot
 
 
@@ -476,8 +474,6 @@ class VerticalStoryLine(FreeStoryLine):
         dot = super().adjust_dot_position(story, in_or_out)
         if story is self.target:
             dot.set_x(self.head.out_dot.get_x())
-        else:
-            dot.set_x(self.head.in_dot.get_x())
         return dot
 
 

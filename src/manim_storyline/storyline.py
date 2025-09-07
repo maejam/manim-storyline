@@ -51,7 +51,6 @@ class StoryLineScene(m.MovingCameraScene):  # type:ignore[misc]
         self.world = m.Group()
         self.stories: dict[str, "Story"] = {}
         self.origin = self.head = self.create_story("origin")
-        self.origin.in_dot = self.origin.out_dot
         if self.display_origin_frame:
             self.add(self.origin.frame)
         if self.add_origin_frame_to_world:
@@ -71,7 +70,7 @@ class StoryLineScene(m.MovingCameraScene):  # type:ignore[misc]
 
         Returns
         -------
-            The newly created Story object
+            The newly created Story object.
         """
         story = Story(self, name, *args, **kwargs)
         return story
@@ -123,15 +122,13 @@ class Story:
     frame
         The frame surrounding the story. By default a 16*9 Rectangle.
     in_dot
-        The dot going into a story. For the origin story, the ``in_dot`` and
-        ``out_dot`` are the same.
+        The dot going into a story.
     in_dot_direction
         Where the ``in_dot`` should be positioned relative to the story frame.
     in_dot_buffer
         The padding between the ``in_dot`` and the frame.
     out_dot
-        The dot going into a story. For the origin story, the ``out_dot`` and
-        ``out_dot`` are the same.
+        The dot going into a story.
     out_dot_direction
         Where the ``out_dot`` should be positioned relative to the story frame.
     out_dot_buffer
@@ -141,10 +138,10 @@ class Story:
     scene: StoryLineScene
     name: str
     frame: m.VMobject = field(default_factory=lambda: m.Rectangle(width=16, height=9))
-    in_dot: m.Dot = field(default_factory=lambda: m.Dot())
+    in_dot: m.VMobject = field(default_factory=lambda: m.Dot())
     in_dot_direction: mt.Vector3D = field(default_factory=lambda: m.DOWN)
     in_dot_buffer: float = 5
-    out_dot: m.Dot = field(default_factory=lambda: m.Dot())
+    out_dot: m.VMobject = field(default_factory=lambda: m.Dot())
     out_dot_direction: mt.Vector3D = field(default_factory=lambda: m.DOWN)
     out_dot_buffer: float = 5
 
