@@ -11,7 +11,7 @@ Currently 4 transitions are available:
 
 ## Example
 
-[![Watch the video](https://raw.githubusercontent.com/maejam/manim-storyline/main/examples/thumb.png)](https://raw.githubusercontent.com/maejam/manim-storyline/main/examples/example1.mp4)
+https://github.com/user-attachments/assets/74ce2bb4-4d92-49de-b224-b6b4b9210e48
 
 
 ```python
